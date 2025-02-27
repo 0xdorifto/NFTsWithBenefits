@@ -1,0 +1,38 @@
+{
+  "canisters": {
+    "internet_identity": {
+      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
+      "frontend": {},
+      "remote": {
+        "id": {
+          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+        }
+      },
+      "type": "custom",
+      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz"
+    },
+    "nftswithbenefits_backend": {
+      "candid": "src/nftswithbenefits_backend/nftswithbenefits_backend.did",
+      "package": "nftswithbenefits_backend",
+      "type": "rust"
+    },
+    "nftswithbenefits_frontend": {
+      "dependencies": [
+        "nftswithbenefits_backend"
+      ],
+      "source": [
+        "src/nftswithbenefits_frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "nftswithbenefits_frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
