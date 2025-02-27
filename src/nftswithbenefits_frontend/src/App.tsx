@@ -1,27 +1,30 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Routes, Route, Link } from "react-router-dom";
+import Dashboard from "./routes/Dashboard";
+import Layout from "./components/Layout";
+import { Login } from './pages/Login';
 
-function App() {
-  const [count, setCount] = useState(0)
+import "./styles/globals.css";
 
+
+export default function App() {
   return (
-    <>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<Dashboard />} />
+        <Route path="login" element={<Login />} />
+        <Route path="*" element={<NoMatch />} />
+      </Route>
+    </Routes>
+  );
 }
 
-export default App
+function NoMatch() {
+  return (
+    <div>
+      <h2>Nothing to see here!</h2>
+      <p>
+        <Link to="/">Go to the home page</Link>
+      </p>
+    </div>
+  );
+}
