@@ -1,5 +1,0 @@
-[workspace]
-members = [
-    "src/nftswithbenefits_backend"
-]
-resolver = "2"
