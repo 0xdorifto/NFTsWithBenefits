@@ -1,6 +1,4 @@
-import classNames from "classnames";
 import { Logo } from "./Logo";
-import Typography from "./Typography";
 
 const Topbar = () => {
   return (
