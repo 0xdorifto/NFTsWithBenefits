@@ -1,12 +1,13 @@
 import type { NextConfig } from "next";
 
+
+const output = process.env.NEXT_PUBLIC_OUTPUT_MODE as "standalone" | "export"
+
 const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
-  output: "export",
+  output: output ?? "export",
   typescript: {
-    // !! WARN !!
-    // Ignoring TypeScript errors during build can lead to issues in production
     ignoreBuildErrors: true,
   },
   images: {
