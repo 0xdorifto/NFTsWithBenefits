@@ -3,20 +3,16 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import dynamic from 'next/dynamic';
 import AgentHero from '@/components/agents/details/AgentHero';
-import StatsPanel from '@/components/agents/details/StatsPanel';
-import ActivityTimeline from '@/components/agents/details/ActivityTimeline';
-import ChallengeHistory from '@/components/agents/details/ChallengeHistory';
-import SocialSection from '@/components/agents/details/SocialSection';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import AgentSkillsSection from '@/components/agents/details/AgentSkillsSection';
 import { toast } from 'react-hot-toast';
-import axios from 'axios';
+import AgentChatInterface from '@/components/agents/details/AgentChatInterface';
 
 interface Agent {
   id: string;
   name: string;
   avatar: string;
   description: string;
-  level: number;
   experience: number;
   traits: Record<string, number>;
   skills: string[];
@@ -56,16 +52,15 @@ const AgentDetailsPage = () => {
       name: 'Agent 1',
       avatar: 'https://i.pravatar.cc/300',
       description: 'This is a description of Agent 1',
-      level: 1,
       experience: 0,
-      traits: { trait1: 1, trait2: 2 },
-      skills: ['skill1', 'skill2'],
-      specializations: ['specialization1', 'specialization2'],
+      traits: { intelligence: 85, creativity: 92, logic: 78, empathy: 65, adaptability: 88 },
+      skills: ['Web Development', 'Data Analysis', 'Problem Solving', 'Technical Writing', 'API Design'],
+      specializations: ['AI Systems', 'Blockchain Development', 'User Experience'],
       wallet_address: '0x1234567890',
       created_at: new Date().toISOString()
-
     } as Agent)
     setLoading(false);
+    // -------------------------------
   }, [id]);
 
   if (loading) {
@@ -92,10 +87,16 @@ const AgentDetailsPage = () => {
 
       <main className="container mx-auto px-4 py-8">
         <AgentHero agent={agent} />
-
-
-
-       
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
+          <div className="lg:col-span-2">
+            <AgentChatInterface agent={agent} />
+          </div>
+          
+          <div className="lg:col-span-1">
+            <AgentSkillsSection agent={agent} />
+          </div>         
+        </div>
       </main>
     </div>
   );
