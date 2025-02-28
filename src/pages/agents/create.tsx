@@ -181,7 +181,7 @@ const CreateAgentPage = () => {
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-gray-900 to-black">
       <Head>
-        <title>Create Agent - AI Agent Arena</title>
+        <title>Create Agent</title>
       </Head>
 
       <main className="container mx-auto px-4 py-8">
@@ -194,8 +194,8 @@ const CreateAgentPage = () => {
           <>
             <ProgressStepper steps={steps} currentStep={currentStep} />
 
-            <div className="mt-8 grid grid-cols-3 gap-8">
-              <div className="col-span-2">
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="col-span-1 md:col-span-2">
                 {formComponents[currentStep]}
 
                 <div className="mt-8 flex justify-between">
@@ -233,8 +233,8 @@ const CreateAgentPage = () => {
                 </div>
               </div>
 
-              <div className="col-span-1">
-                <AgentPreview agentData={agentData as any} />
+              <div className="col-span-1 order-first md:order-last">
+                <AgentPreview agentData={agentData} />
               </div>
             </div>
           </>
