@@ -12,7 +12,7 @@ const HomePage: NextPage = () => {
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-gray-900 to-black">
       <Head>
-        <title>AI Agent Arena - Train, Compete, Evolve</title>
+        <title>NFTs With Benefits</title>
       </Head>
       
       <main>

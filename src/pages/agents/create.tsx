@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
@@ -10,7 +10,7 @@ import SpecializationForm from '@/components/agents/forms/SpecializationForm';
 import ReviewForm from '@/components/agents/forms/ReviewForm';
 import dynamic from 'next/dynamic';
 import { useAccount } from 'wagmi';
-import axios from 'axios';
+import { type Doc, initSatellite, setDoc, uploadFile, type User } from "@junobuild/core-peer";
 
 // Client-side only wallet connection button
 const WalletButton = dynamic(
@@ -40,6 +40,20 @@ const CreateAgentPage = () => {
     specializations: [],
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [junoUser, setJunoUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        await initSatellite({
+          satelliteId: process.env.NEXT_PUBLIC_SATELLITE_ID || "5ndk7-myaaa-aaaak-qcfmq-cai" // Replace with your actual satellite ID if needed
+        });
+      } catch (error) {
+        console.error("Failed to initialize Juno satellite:", error);
+        toast.error("Failed to connect to the network. Please try again later.");
+      }
+    })();
+  }, []);
 
   const steps = ['Identity', 'Traits & Skills', 'Specialization', 'Review'];
   
@@ -90,33 +104,62 @@ const CreateAgentPage = () => {
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
+    if (!address) return;
   
     setIsSubmitting(true);
   
-    const newAgent = {
-      wallet_address: address,
-      name: agentData.name,
-      avatar: agentData.avatar,
-      description: agentData.description,
-      traits: agentData.traits || [],
-      skills: agentData.skills || [],
-      specializations: agentData.specializations || [],
-      experience: 0,
-      level: 1,
-    };
-  
     try {
-      // TODO: create cannister with agent data
-      // TODO2: Mint NFT with cannister metadata
+      // Create agent JSON data
+      const agentJson = {
+        wallet_address: address,
+        name: agentData.name,
+        avatar: agentData.avatar,
+        description: agentData.description,
+        traits: agentData.traits || [],
+        skills: agentData.skills || [],
+        specializations: agentData.specializations || [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        version: "1.0.0"
+      };
+      
+      const agentJsonBlob = new Blob([JSON.stringify(agentJson, null, 2)], {
+        type: "application/json",
+      });
+      
+      const agentFile = new File(
+        [agentJsonBlob], 
+        `agent-${address}-${Date.now()}.json`, 
+        { type: "application/json" }
+      );
 
-      // newAgent
-      const data = {agent: {} as any} 
-  
-      // toast.success('Agent created successfully!');
-      // router.push(`/agents/${data.agent._id}`);
+      const uploadResult = await uploadFile({
+        collection: "agents",
+        data: agentFile,
+        filename: agentFile.name
+      });
+      
+      console.log("Agent file uploaded:", uploadResult);
+
+      await setDoc({
+        collection: "agents",
+        doc: {
+          key: `agent-${address}-${Date.now()}`,
+          data: {
+            ...agentJson,
+            fileUrl: uploadResult.downloadUrl
+          }
+        },
+      });
+
+      toast.success('Agent created successfully!');
+      router.push(`/agents`);
     } catch (error: any) {
       console.error('Error creating agent:', error);
-      const errorMsg = error.response?.data?.message || 'Failed to create agent. Please try again.';
+      const errorMsg = 
+        error.response?.data?.message || 
+        error.message || 
+        'Failed to create agent. Please try again.';
       toast.error(errorMsg);
     } finally {
       setIsSubmitting(false);

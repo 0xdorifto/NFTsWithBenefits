@@ -32,3 +32,35 @@ export interface ChallengeResult {
   experienceGained: number;
   timestamp: Date;
 }
+
+export interface AgentTrait {
+  name: string;
+  value: number;
+}
+
+export interface AgentSkill {
+  name: string;
+  proficiency: number;
+}
+
+export interface AgentSpecialization {
+  name: string;
+  description: string;
+}
+
+export interface AgentData {
+  name: string;
+  avatar: string;
+  description: string;
+  traits: AgentTrait[];
+  skills: AgentSkill[];
+  specializations: AgentSpecialization[];
+}
+
+export interface AgentMetadata extends AgentData {
+  wallet_address: string;
+  created_at: string;
+  updated_at: string;
+  version: string;
+  fileUrl?: string;
+}

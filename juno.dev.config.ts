@@ -5,9 +5,9 @@ export default defineDevConfig(() => ({
     collections: {
       db: [
         {
-          collection: "demo",
-          read: "managed" as const,
-          write: "managed" as const,
+          collection: "agents",
+          read: "public" as const,
+          write: "public" as const,
           memory: "stable" as const,
           mutablePermissions: true
         }

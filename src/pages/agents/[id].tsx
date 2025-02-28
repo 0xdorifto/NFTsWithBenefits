@@ -38,6 +38,7 @@ const AgentDetailsPage = () => {
       try {
         // TODO: Fetch agent data from cannister
         const data = { agent: {} as any }
+        throw data;
 
         setAgent(data.agent);  // Assuming the response structure is { agent: { ... } }
       } catch (error: any) {
@@ -61,7 +62,7 @@ const AgentDetailsPage = () => {
 
   if (!agent) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+      <div className="min-h-screen w-full bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
         <div className="text-white text-xl">Agent not found</div>
       </div>
     );
@@ -80,14 +81,6 @@ const AgentDetailsPage = () => {
           <div className="col-span-4">
             <StatsPanel agent={agent} />
           </div>
-          
-          <div className="col-span-8">
-            <ActivityTimeline agentId={agent.id} />
-          </div>
-        </div>
-
-        <div className="mt-8">
-          <ChallengeHistory agentId={agent.id} />
         </div>
 
         <div className="mt-8">

@@ -17,6 +17,7 @@
     "@heroicons/react": "^2.2.0",
     "@junobuild/config": "^0.1.2",
     "@junobuild/core": "^0.1.8",
+    "@junobuild/core-peer": "^0.1.8",
     "@radix-ui/react-progress": "^1.1.1",
     "@radix-ui/react-slider": "^1.2.2",
     "@radix-ui/react-tooltip": "^1.1.6",
