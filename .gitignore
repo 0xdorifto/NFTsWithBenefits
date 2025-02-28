@@ -45,3 +45,4 @@ public/workers
 target
 
 .github
+.env

@@ -1,0 +1,18 @@
+[package]
+name = "satellite"
+version = "0.0.2"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+candid = "0.10.2"
+ic-cdk = "0.17.0"
+serde = "1.0.190"
+serde_json = "1.0.111"
+junobuild-satellite = { version = "0.0.21", default-features = false, features = [
+  "on_set_doc",
+] }
+junobuild-macros = "0.0.3"
+junobuild-utils = "0.0.4"
