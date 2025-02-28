@@ -193,7 +193,7 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({ agentData }) => {
               <h4 className="text-sm font-semibold text-white">Traits</h4>
             </div>
             <span className="text-xs text-gray-400">
-              {Array.isArray(traits) ? traits.length : 0}/5
+              {Array.isArray(traits) ? traits.length : 0}/3
             </span>
           </div>
           <div className="bg-black/20 border border-white/10 rounded-lg p-3">
@@ -209,7 +209,7 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({ agentData }) => {
               <h4 className="text-sm font-semibold text-white">Skills</h4>
             </div>
             <span className="text-xs text-gray-400">
-              {Array.isArray(skills) ? skills.length : 0}/10
+              {Array.isArray(skills) ? skills.length : 0}/3
             </span>
           </div>
           <div className="bg-black/20 border border-white/10 rounded-lg p-3">
@@ -225,7 +225,7 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({ agentData }) => {
               <h4 className="text-sm font-semibold text-white">Specializations</h4>
             </div>
             <span className="text-xs text-gray-400">
-              {Array.isArray(specializations) ? specializations.length : 0}/3
+              {Array.isArray(specializations) ? specializations.length : 0}/2
             </span>
           </div>
           <div className="bg-black/20 border border-white/10 rounded-lg p-3">
