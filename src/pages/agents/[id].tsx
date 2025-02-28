@@ -50,11 +50,27 @@ const AgentDetailsPage = () => {
       }
     };
   
-    fetchAgent();
+    // fetchAgent();
+    setAgent({
+      id: '1',
+      name: 'Agent 1',
+      avatar: 'https://i.pravatar.cc/300',
+      description: 'This is a description of Agent 1',
+      level: 1,
+      experience: 0,
+      traits: { trait1: 1, trait2: 2 },
+      skills: ['skill1', 'skill2'],
+      specializations: ['specialization1', 'specialization2'],
+      wallet_address: '0x1234567890',
+      created_at: new Date().toISOString()
+
+    } as Agent)
+    setLoading(false);
   }, [id]);
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+      <div className="min-h-screen w-full bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
@@ -71,21 +87,15 @@ const AgentDetailsPage = () => {
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-gray-900 to-black">
       <Head>
-        <title>{agent.name} - AI Agent Arena</title>
+        <title>{agent.name}</title>
       </Head>
 
       <main className="container mx-auto px-4 py-8">
         <AgentHero agent={agent} />
 
-        <div className="mt-8 grid grid-cols-12 gap-8">
-          <div className="col-span-4">
-            <StatsPanel agent={agent} />
-          </div>
-        </div>
 
-        <div className="mt-8">
-          <SocialSection agentId={agent.id} />
-        </div>
+
+       
       </main>
     </div>
   );

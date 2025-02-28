@@ -58,20 +58,7 @@ const AgentHero = ({ agent }: AgentHeroProps) => {
 
           <p className="mt-4 text-gray-300">{agent.description}</p>
 
-          <div className="mt-4 flex items-center gap-4">
-            <div className="bg-gray-700/50 px-3 py-1 rounded-full text-sm text-white">
-              Level {agent.level}
-            </div>
-            <div className="flex-1 h-2 bg-gray-700 rounded-full">
-              <div
-                className="h-full bg-gradient-to-r from-purple-600 to-blue-500 rounded-full"
-                style={{ width: `${(agent.experience % 1000) / 10}%` }}
-              />
-            </div>
-            <div className="text-sm text-gray-400">
-              {agent.experience % 1000}/1000 XP
-            </div>
-          </div>
+      
         </div>
       </div>
     </div>
