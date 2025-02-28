@@ -51,6 +51,10 @@ export interface AgentSpecialization {
 export interface AgentData {
   name: string;
   avatar: string;
+  avatarMetadata?: {
+    styleId: string;
+    variation: string;
+  };
   description: string;
   traits: AgentTrait[];
   skills: AgentSkill[];

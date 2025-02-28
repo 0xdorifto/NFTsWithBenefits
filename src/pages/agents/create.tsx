@@ -34,6 +34,7 @@ const CreateAgentPage = () => {
   const [agentData, setAgentData] = useState({
     name: '',
     avatar: '',
+    avatarMetadata: null,
     description: '',
     traits: [],
     skills: [],
@@ -114,6 +115,7 @@ const CreateAgentPage = () => {
         wallet_address: address,
         name: agentData.name,
         avatar: agentData.avatar,
+        avatar_metadata: agentData.avatarMetadata,
         description: agentData.description,
         traits: agentData.traits || [],
         skills: agentData.skills || [],
@@ -139,8 +141,6 @@ const CreateAgentPage = () => {
         filename: agentFile.name
       });
       
-      console.log("Agent file uploaded:", uploadResult);
-
       await setDoc({
         collection: "agents",
         doc: {
