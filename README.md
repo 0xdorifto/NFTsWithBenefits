@@ -38,3 +38,7 @@ All commands are run from the root of the project, from a terminal:
 ## Team
 
 This team is composed by Gastão Faria and Cláudio Barreira, two blockchain developers from Lisbon, Portugal. We've both been working on blockchain applications for 2 years, and more on software overall, with computer science backgrounds. We've been to multiple web3 hackathons and are proud to say we've won a few. Cláudio usually works on the Interfaces whereas Gastão does the smart contracts.
+
+## Zircuit Feedback
+
+We used Zircuit to host the NFT collection. We enjoyed working with zircuit as the experience was similar to developing on Ethereum and easy to use.
