@@ -6,6 +6,11 @@ const openai = new OpenAI({
   dangerouslyAllowBrowser: true
 });
 
+export interface AgentAttribute {
+  trait_type: string;
+  value: string;
+}
+
 export interface AgentContext {
   id: string;
   name: string;
@@ -14,6 +19,7 @@ export interface AgentContext {
   skills: string[];
   specializations: string[];
   hiddenDescription?: string; 
+  attributes?: AgentAttribute[];
 }
 
 export interface AgentMutation {
@@ -269,8 +275,26 @@ export async function getAgentResponse(message: string, agentContext: AgentConte
   return sendChatMessage(message, agentContext);
 }
 
+// Helper function to add attributes for a specific category
+function addAttributesToAgent(
+  attributes: AgentAttribute[] | undefined,
+  newValues: string[],
+  categoryType: string
+): AgentAttribute[] {
+  const currentAttributes = attributes || [];
+  
+  // Create new attribute objects for the new values
+  const newAttributes = newValues.map(value => ({
+    trait_type: categoryType,
+    value: value
+  }));
+  
+  return [...currentAttributes, ...newAttributes];
+}
+
 export function applyMutation(agent: AgentContext, mutation: AgentMutation): AgentContext {
   const updatedAgent = { ...agent };
+  const attributes = updatedAgent.attributes || [];
   
   if (mutation.description) {
     updatedAgent.description = mutation.description;
@@ -286,7 +310,14 @@ export function applyMutation(agent: AgentContext, mutation: AgentMutation): Age
         existingSkill => existingSkill.toLowerCase() === newSkill.toLowerCase()
       )
     );
-    updatedAgent.skills = [...updatedAgent.skills, ...newSkills];
+    
+    if (newSkills.length > 0) {
+      // Update skills array
+      updatedAgent.skills = [...updatedAgent.skills, ...newSkills];
+      
+      // Update attributes array with new skills
+      updatedAgent.attributes = addAttributesToAgent(attributes, newSkills, "Skill");
+    }
   }
   
   if (mutation.traits) {
@@ -295,7 +326,18 @@ export function applyMutation(agent: AgentContext, mutation: AgentMutation): Age
         existingTrait => existingTrait.toLowerCase() === newTrait.toLowerCase()
       )
     );
-    updatedAgent.traits = [...updatedAgent.traits, ...newTraits];
+    
+    if (newTraits.length > 0) {
+      // Update traits array
+      updatedAgent.traits = [...updatedAgent.traits, ...newTraits];
+      
+      // Update attributes array with new traits
+      updatedAgent.attributes = addAttributesToAgent(
+        updatedAgent.attributes, 
+        newTraits, 
+        "Trait"
+      );
+    }
   }
   
   if (mutation.specializations) {
@@ -304,7 +346,18 @@ export function applyMutation(agent: AgentContext, mutation: AgentMutation): Age
         existingSpec => existingSpec.toLowerCase() === newSpec.toLowerCase()
       )
     );
-    updatedAgent.specializations = [...updatedAgent.specializations, ...newSpecs];
+    
+    if (newSpecs.length > 0) {
+      // Update specializations array
+      updatedAgent.specializations = [...updatedAgent.specializations, ...newSpecs];
+      
+      // Update attributes array with new specializations
+      updatedAgent.attributes = addAttributesToAgent(
+        updatedAgent.attributes, 
+        newSpecs, 
+        "Specialization"
+      );
+    }
   }
   
   return updatedAgent;

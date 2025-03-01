@@ -226,7 +226,7 @@ const CreateAgentPage = () => {
         traits: agentData.traits || [],
         skills: agentData.skills || [],
         specializations: agentData.specializations || [],
-        attributes: attributes,
+        attributes,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         version: "1.0.0",
