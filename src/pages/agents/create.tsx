@@ -1,22 +1,28 @@
-import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
-import { useRouter } from 'next/router';
-import Head from 'next/head';
-import ProgressStepper from '@/components/agents/ProgressStepper';
-import AgentPreview from '@/components/agents/AgentPreview';
-import IdentityForm from '@/components/agents/forms/IdentityForm';
-import TraitsForm from '@/components/agents/forms/TraitsForm';
-import SpecializationForm from '@/components/agents/forms/SpecializationForm';
-import ReviewForm from '@/components/agents/forms/ReviewForm';
-import dynamic from 'next/dynamic';
-import { useAccount } from 'wagmi';
-import { type Doc, initSatellite, setDoc, uploadFile, type User } from "@junobuild/core-peer";
+import AgentPreview from "@/components/agents/AgentPreview";
+import IdentityForm from "@/components/agents/forms/IdentityForm";
+import ReviewForm from "@/components/agents/forms/ReviewForm";
+import SpecializationForm from "@/components/agents/forms/SpecializationForm";
+import TraitsForm from "@/components/agents/forms/TraitsForm";
+import ProgressStepper from "@/components/agents/ProgressStepper";
+import {
+  initSatellite,
+  setDoc,
+  uploadFile,
+  type User,
+} from "@junobuild/core-peer";
+import { BrowserProvider, ethers } from "ethers";
+import dynamic from "next/dynamic";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
+import { useAccount } from "wagmi";
+import { NFT_CONTRACT_ABI } from "./abi";
 
 // Client-side only wallet connection button
-const WalletButton = dynamic(
-  () => import('@/components/common/WalletButton'),
-  { ssr: false }
-);
+const WalletButton = dynamic(() => import("@/components/common/WalletButton"), {
+  ssr: false,
+});
 
 interface FormErrors {
   name?: string;
@@ -26,16 +32,18 @@ interface FormErrors {
   specializations?: string;
 }
 
+const NFT_CONTRACT_ADDRESS = "0xDa9c2Cb1cAE56288Be700a55F451fCcB1aEec57c";
+
 const CreateAgentPage = () => {
   const router = useRouter();
-  const { address, isConnected, isConnecting } = useAccount()
+  const { address, isConnected, isConnecting } = useAccount();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [agentData, setAgentData] = useState({
-    name: '',
-    avatar: '',
+    name: "",
+    avatar: "",
     avatarMetadata: null,
-    description: '',
+    description: "",
     traits: [],
     skills: [],
     specializations: [],
@@ -47,43 +55,57 @@ const CreateAgentPage = () => {
     (async () => {
       try {
         await initSatellite({
-          satelliteId: process.env.NEXT_PUBLIC_SATELLITE_ID || "5ndk7-myaaa-aaaak-qcfmq-cai" // Replace with your actual satellite ID if needed
+          satelliteId: process.env.NEXT_PUBLIC_SATELLITE_ID || "",
         });
       } catch (error) {
         console.error("Failed to initialize Juno satellite:", error);
-        toast.error("Failed to connect to the network. Please try again later.");
+        toast.error(
+          "Failed to connect to the network. Please try again later."
+        );
       }
     })();
   }, []);
 
-  const steps = ['Identity', 'Traits & Skills', 'Specialization', 'Review'];
-  
+  const steps = ["Identity", "Traits & Skills", "Specialization", "Review"];
+
   const formComponents = [
-    <IdentityForm key="identity" agentData={agentData} setAgentData={setAgentData}  />,
-    <TraitsForm key="traits" agentData={agentData} setAgentData={setAgentData}  />,
-    <SpecializationForm key="spec" agentData={agentData} setAgentData={setAgentData}  />,
-    <ReviewForm key="review" agentData={agentData} />
+    <IdentityForm
+      key="identity"
+      agentData={agentData}
+      setAgentData={setAgentData}
+    />,
+    <TraitsForm
+      key="traits"
+      agentData={agentData}
+      setAgentData={setAgentData}
+    />,
+    <SpecializationForm
+      key="spec"
+      agentData={agentData}
+      setAgentData={setAgentData}
+    />,
+    <ReviewForm key="review" agentData={agentData} />,
   ];
 
   const validateForm = () => {
     const errors: FormErrors = {};
-    
+
     if (!agentData.name) {
-      errors.name = 'Name is required';
+      errors.name = "Name is required";
     }
 
     if (!agentData.description) {
-      errors.description = 'Description is required';
+      errors.description = "Description is required";
     }
-    
+
     // if (Object.keys(agentData.traits).length === 0) {
     //   errors.traits = 'At least one trait must be selected';
     // }
-    
+
     // if (agentData.skills.length === 0) {
     //   errors.skills = 'At least one skill must be selected';
     // }
-    
+
     // if (agentData.specializations.length === 0) {
     //   errors.specializations = 'At least one specialization must be selected';
     // }
@@ -91,12 +113,12 @@ const CreateAgentPage = () => {
     setFormErrors(errors);
 
     if (Object.keys(errors).length > 0) {
-      toast.error('Please fix the highlighted errors');
+      toast.error("Please fix the highlighted errors");
       return false;
     }
 
     if (!isConnected) {
-      toast.error('Please connect your wallet first');
+      toast.error("Please connect your wallet first");
       return false;
     }
 
@@ -106,9 +128,9 @@ const CreateAgentPage = () => {
   const handleSubmit = async () => {
     if (!validateForm()) return;
     if (!address) return;
-  
+
     setIsSubmitting(true);
-  
+
     try {
       // Create agent JSON data
       const agentJson = {
@@ -122,48 +144,93 @@ const CreateAgentPage = () => {
         specializations: agentData.specializations || [],
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        version: "1.0.0"
+        version: "1.0.0",
       };
-      
+
       const agentJsonBlob = new Blob([JSON.stringify(agentJson, null, 2)], {
         type: "application/json",
       });
 
-      const agentId = `agent-${address}-${Date.now()}`
+      const agentId = `agent-${address}-${Date.now()}`;
 
-      
-      const agentFile = new File(
-        [agentJsonBlob], 
-        agentId, 
-        { type: "application/json" }
-      );
+      const agentFile = new File([agentJsonBlob], agentId, {
+        type: "application/json",
+      });
 
+      // Upload metadata first
       const uploadResult = await uploadFile({
         collection: "agents",
         data: agentFile,
-        filename: agentFile.name
+        filename: agentFile.name,
       });
 
-      
-      await setDoc({
-        collection: "agents",
-        doc: {
-          key: agentId,
-          data: {
-            ...agentJson,
-            fileUrl: uploadResult.downloadUrl
+      try {
+        // Connect to the network
+        const provider = new BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+
+        // Create contract instance
+        const contract = new ethers.Contract(
+          NFT_CONTRACT_ADDRESS,
+          NFT_CONTRACT_ABI,
+          signer
+        );
+
+        // Mint NFT
+        console.log("Minting NFT...");
+        const mintTx = await contract.mint(address, {
+          gasLimit: 200000, // Adding explicit gas limit for minting
+        });
+        console.log("Waiting for mint transaction...");
+        const receipt = await mintTx.wait();
+        console.log("NFT minted successfully");
+
+        // Get the token ID from the mint event
+        const transferEvent = receipt.logs.find((log) => {
+          try {
+            const parsed = ethers.Interface.from(NFT_CONTRACT_ABI).parseLog({
+              topics: [...log.topics],
+              data: log.data,
+            });
+            return parsed?.name === "Transfer";
+          } catch {
+            return false;
           }
-        },
-      });
+        });
 
-      toast.success('Agent created successfully!');
-      router.push(`/agents/${agentId}`);
+        const tokenId = transferEvent
+          ? parseInt(transferEvent.topics[3], 16)
+          : 0;
+
+        const network = await provider.getNetwork();
+
+        // Save agent data with NFT contract info
+        await setDoc({
+          collection: "agents",
+          doc: {
+            key: agentId,
+            data: {
+              ...agentJson,
+              fileUrl: uploadResult.downloadUrl,
+              nftContractAddress: NFT_CONTRACT_ADDRESS,
+              nftTokenId: tokenId,
+              chainId: network.chainId,
+            },
+          },
+        });
+
+        toast.success("Agent created and NFT minted successfully!");
+        router.push(`/agents/${agentId}`);
+      } catch (error) {
+        console.error("NFT minting error:", error);
+        throw error;
+      }
     } catch (error: any) {
-      console.error('Error creating agent:', error);
-      const errorMsg = 
-        error.response?.data?.message || 
-        error.message || 
-        'Failed to create agent. Please try again.';
+      console.error("Error creating agent or minting NFT:", error);
+      const errorMsg =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to create agent and mint NFT. Please try again.";
       toast.error(errorMsg);
     } finally {
       setIsSubmitting(false);
@@ -191,7 +258,9 @@ const CreateAgentPage = () => {
       <main className="container mx-auto px-4 py-8">
         {!isConnected ? (
           <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
-            <h2 className="text-xl text-white">Please connect your wallet to create an agent</h2>
+            <h2 className="text-xl text-white">
+              Please connect your wallet to create an agent
+            </h2>
             <WalletButton />
           </div>
         ) : (
@@ -223,7 +292,7 @@ const CreateAgentPage = () => {
                           <span>Creating...</span>
                         </>
                       ) : (
-                        'Create Agent'
+                        "Create Agent"
                       )}
                     </button>
                   ) : (
@@ -249,5 +318,5 @@ const CreateAgentPage = () => {
 };
 
 export default dynamic(() => Promise.resolve(CreateAgentPage), {
-  ssr: false
+  ssr: false,
 });

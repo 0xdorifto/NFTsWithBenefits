@@ -1,16 +1,14 @@
 use ic_cdk::api::management_canister::http_request::{
     http_request as http_request_outcall, CanisterHttpRequestArgument, HttpMethod,
 };
-use junobuild_macros::{on_delete_doc, on_set_doc, on_set_many_docs, on_upload_asset};
-use junobuild_satellite::{
-    include_satellite, set_doc_store, OnSetDocContext, OnUploadAssetContext, SetDoc,
-};
+use junobuild_macros::on_set_doc;
+use junobuild_satellite::{include_satellite, set_doc_store, OnSetDocContext, SetDoc};
 use junobuild_utils::encode_doc_data;
 use serde::{Deserialize, Serialize};
 
 // The data of the document we are looking to update in the Satellite's Datastore.
-#[derive(Serialize, Deserialize, Debug)]
-struct DogData {
+#[derive(Serialize, Deserialize)]
+struct ChatData {
     src: Option<String>,
 }
 
@@ -30,12 +28,77 @@ struct DogApiResponse {
     status: String,
 }
 
-#[on_set_doc(collections = ["agents"])]
+#[derive(Serialize, Deserialize)]
+struct OpenAiApiResponse {
+    object: String,
+    data: Vec<ChatCompletion>,
+    first_id: String,
+    last_id: String,
+    has_more: bool,
+}
+
+#[derive(Serialize, Deserialize)]
+struct ChatCompletion {
+    object: String,
+    id: String,
+    model: String,
+    created: i64,
+    request_id: String,
+    tool_choice: Option<serde_json::Value>,
+    usage: Usage,
+    seed: i64,
+    top_p: f64,
+    temperature: f64,
+    presence_penalty: f64,
+    frequency_penalty: f64,
+    system_fingerprint: String,
+    input_user: Option<serde_json::Value>,
+    service_tier: String,
+    tools: Option<serde_json::Value>,
+    metadata: serde_json::Value,
+    choices: Vec<Choice>,
+    response_format: Option<serde_json::Value>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct Usage {
+    total_tokens: i32,
+    completion_tokens: i32,
+    prompt_tokens: i32,
+}
+
+#[derive(Serialize, Deserialize)]
+struct Choice {
+    index: i32,
+    message: Message,
+    finish_reason: String,
+    logprobs: Option<serde_json::Value>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct Message {
+    content: String,
+    role: String,
+    tool_calls: Option<serde_json::Value>,
+    function_call: Option<serde_json::Value>,
+}
+
+#[on_set_doc(collections = ["messages"])]
 async fn on_set_doc(context: OnSetDocContext) -> Result<(), String> {
     // 1. Prepare the HTTP GET request
-    let url = "https://dog.ceo/api/breeds/image/random".to_string();
+    let url = "https://api.openai.com/v1/chat/completions".to_string();
 
-    let request_headers = vec![];
+    // Add required headers for OpenAI API
+    let request_headers = vec![
+        (
+            "Authorization".to_string(),
+            format!(
+                "Bearer {}",
+                std::env::var("OPENAI_API_KEY").map_err(|e| e.to_string())?
+            ),
+        ),
+        ("Content-Type".to_string(), "application/json".to_string()),
+    ];
 
     let request = CanisterHttpRequestArgument {
         url,
@@ -62,33 +125,33 @@ async fn on_set_doc(context: OnSetDocContext) -> Result<(), String> {
             let str_body = String::from_utf8(response.body)
                 .expect("Transformed response is not UTF-8 encoded.");
 
-            let dog_response: DogApiResponse =
+            let response: OpenAiApiResponse =
                 serde_json::from_str(&str_body).map_err(|e| e.to_string())?;
 
             // 4. Our goal is to update the document in the Datastore with an update that contains the link to the image fetched from the API we just called.
-            let dog: DogData = DogData {
-                src: Some(dog_response.message),
+            let chat: ChatData = ChatData {
+                src: Some(response.data[0].message.content),
             };
 
-            // 5. We encode those data back to blob because the Datastore holds data as blob.
-            let encode_data = encode_doc_data(&dog)?;
+            println!("chat: {:?}", chat);
 
-            // 6. Then we construct the parameters required to call the function that save the data in the Datastore.
-            let doc: SetDoc = SetDoc {
-                data: encode_data,
-                description: context.data.data.after.description,
-                version: context.data.data.after.version,
-            };
+            // // 5. We encode those data back to blob because the Datastore holds data as blob.
+            // let encode_data = encode_doc_data(&chat)?;
 
-            // 7. We store the data in the Datastore for the same caller as the one who triggered the original on_set_doc, in the same collection with the same key as well.
-            set_doc_store(
-                context.caller,
-                context.data.collection,
-                context.data.key,
-                doc,
-            )?;
+            // // 6. Then we construct the parameters required to call the function that save the data in the Datastore.
+            // let doc: SetDoc = SetDoc {
+            //     data: encode_data,
+            //     description: context.data.data.after.description,
+            //     version: context.data.data.after.version,
+            // };
 
-            println!("dog: {:?}", dog);
+            // // 7. We store the data in the Datastore for the same caller as the one who triggered the original on_set_doc, in the same collection with the same key as well.
+            // set_doc_store(
+            //     context.caller,
+            //     context.data.collection,
+            //     context.data.key,
+            //     doc,
+            // )?;
 
             Ok(())
         }
@@ -99,13 +162,6 @@ async fn on_set_doc(context: OnSetDocContext) -> Result<(), String> {
             Err(message)
         }
     }
-}
-
-#[on_upload_asset(collections = ["agents"])]
-async fn on_upload_asset(context: OnUploadAssetContext) -> Result<(), String> {
-    println!("Asset uploaded {}", context.data.key.full_path);
-    ic_cdk::print("This is a log entry.");
-    Ok(())
 }
 
 include_satellite!();
