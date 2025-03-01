@@ -15,21 +15,21 @@ async function main() {
   console.log("Waiting for block confirmations...");
   await myNFT.deploymentTransaction().wait(5);
 
-  // Verify the contract
-  console.log("Verifying contract...");
-  try {
-    await hre.run("verify:verify", {
-      address: contractAddress,
-      constructorArguments: [baseURI],
-    });
-    console.log("Contract verified successfully");
-  } catch (error) {
-    if (error.message.includes("Already Verified")) {
-      console.log("Contract is already verified!");
-    } else {
-      console.error("Error verifying contract:", error);
-    }
-  }
+  // // Verify the contract
+  // console.log("Verifying contract...");
+  // try {
+  //   await hre.run("verify:verify", {
+  //     address: contractAddress,
+  //     constructorArguments: [baseURI],
+  //   });
+  //   console.log("Contract verified successfully");
+  // } catch (error) {
+  //   if (error.message.includes("Already Verified")) {
+  //     console.log("Contract is already verified!");
+  //   } else {
+  //     console.error("Error verifying contract:", error);
+  //   }
+  // }
 }
 
 main().catch((error) => {

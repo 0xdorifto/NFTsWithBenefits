@@ -5,10 +5,24 @@ import {
 } from "@rainbow-me/rainbowkit";
 import "@rainbow-me/rainbowkit/styles.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { base, baseGoerli, sepolia } from "viem/chains";
+import {
+  base,
+  baseGoerli,
+  flowTestnet,
+  hederaTestnet,
+  taraxaTestnet,
+  zircuitTestnet,
+} from "viem/chains";
 import { WagmiProvider } from "wagmi";
 
-const chains: readonly [Chain, ...Chain[]] = [base, baseGoerli, sepolia];
+const chains: readonly [Chain, ...Chain[]] = [
+  base,
+  baseGoerli,
+  flowTestnet,
+  zircuitTestnet,
+  hederaTestnet,
+  taraxaTestnet,
+];
 
 const config = getDefaultConfig({
   appName: "AI Arena",
