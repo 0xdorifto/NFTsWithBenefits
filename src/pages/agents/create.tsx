@@ -128,10 +128,13 @@ const CreateAgentPage = () => {
       const agentJsonBlob = new Blob([JSON.stringify(agentJson, null, 2)], {
         type: "application/json",
       });
+
+      const agentId = `agent-${address}-${Date.now()}`
+
       
       const agentFile = new File(
         [agentJsonBlob], 
-        `agent-${address}-${Date.now()}.json`, 
+        agentId, 
         { type: "application/json" }
       );
 
@@ -140,11 +143,12 @@ const CreateAgentPage = () => {
         data: agentFile,
         filename: agentFile.name
       });
+
       
       await setDoc({
         collection: "agents",
         doc: {
-          key: `agent-${address}-${Date.now()}`,
+          key: agentId,
           data: {
             ...agentJson,
             fileUrl: uploadResult.downloadUrl
@@ -153,7 +157,7 @@ const CreateAgentPage = () => {
       });
 
       toast.success('Agent created successfully!');
-      router.push(`/agents`);
+      router.push(`/agents/${agentId}`);
     } catch (error: any) {
       console.error('Error creating agent:', error);
       const errorMsg = 

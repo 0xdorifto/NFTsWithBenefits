@@ -40,13 +40,13 @@ const AgentChatInterface: React.FC<AgentChatInterfaceProps> = ({ id, agent }) =>
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  // useEffect(() => {
+  //   scrollToBottom();
+  // }, [messages]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  // const scrollToBottom = () => {
+  //   messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // };
 
   const updateAgent = async (agentUpdates: any) => {
     try {
@@ -68,25 +68,20 @@ const AgentChatInterface: React.FC<AgentChatInterfaceProps> = ({ id, agent }) =>
         ];
       }
 
-      // Fixed traits handling - correctly handle traits as a Record<string, number>
       if (agentUpdates.traits) {
-        // Initialize traits if it doesn't exist
         if (!updatedAgent.traits) {
           updatedAgent.traits = {};
         }
         
-        // Add each trait with a default value of 50 (middle of 0-100 range)
-        // or keep existing trait values if traits are provided as strings
+
         agentUpdates.traits.forEach((trait: string) => {
           const traitName = trait.toLowerCase().trim();
           
-          // Check if this trait doesn't already exist in some form
           const existingTrait = Object.keys(updatedAgent.traits || {}).find(
             t => t.toLowerCase() === traitName
           );
           
           if (!existingTrait) {
-            // Add as new trait with default value of 50
             updatedAgent.traits[trait] = 50;
           }
         });

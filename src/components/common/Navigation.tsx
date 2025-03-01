@@ -25,6 +25,8 @@ const Navigation = () => {
           {/* Right Section */}
           <div className="flex items-center space-x-4">
             {isConnected && (
+              <>
+              <Link href="/agents">Agents</Link>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -33,6 +35,7 @@ const Navigation = () => {
               >
                 Create Agent
               </motion.button>
+              </>
             )}
             
             <ConnectButton 
