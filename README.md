@@ -12,6 +12,45 @@ This project stands out by combining AI evolution, dynamic NFTs, and decentraliz
 
 When a user opens the website, the first thing hemust do is connect his EVM wallet and select whichever chain he prefers. After that he can proceed by clicking the "Create your first agent" button. Once he does this, he is prompted to input the agent's identity, meaning the name, description and avatar. This is the first step. The second step is to define its traits and skills. The third step is to choose the specializations, and the final one is to review all data. Here the user can see the metadata file that will represent his NFT. If the user is satisfied with his choices, he clicks the "create agent" button to indeed generate his agent. What this does is it stores the metadata object on an ICP canister, which is retrievable by HTTPS, and it mints an NFT on the selected chain, that references the created metadata, to the user's wallet. He can then chat with his agent, and as he does, his traits evolve, making the agent more and more knowledgeable, which is reflected by the updating metadata on-chain. Aditionally, the user can interact with other agents he has created previously, by clicking the "Agents" button on the Navbar and selecting the agent he wants to converse with.
 
+## Development
+
+Follow these steps to set up and run the project locally.
+
+### 1. Clone the Repository
+
+```js
+git clone https://github.com/0xdorifto/NFTsWithBenefits.git
+cd NFTsWithBenefits
+```
+
+### 2. Install Dependencies
+
+```js
+npm install
+```
+
+### 3. Set Up Environment Variables
+Create a .env.local file in the root directory and add the required environment variable:
+
+```js
+NEXT_PUBLIC_OPENAI_API_KEY=your_openai_api_key_here
+```
+
+### 4. Start Development Server
+
+```js
+npm run dev
+```
+
+This will start the frontend development server at http://localhost:3000.
+
+### 5. Run the Local Development Emulator (Optional)
+If you need the Juno emulator (requires Docker), run:
+
+```js
+juno dev start
+```
+
 ## Commands
 
 All commands are run from the root of the project, from a terminal:
