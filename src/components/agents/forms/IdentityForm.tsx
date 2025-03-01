@@ -33,7 +33,7 @@ const IdentityForm: FC<IdentityFormProps> = ({ agentData, setAgentData }) => {
         }
       });
     }
-  }, []);
+  }, [agentData, setAgentData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setAgentData({

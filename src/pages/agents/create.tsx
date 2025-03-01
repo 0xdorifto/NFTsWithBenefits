@@ -18,7 +18,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useAccount, useChainId } from "wagmi";
-import { NFT_CONTRACT_ABI } from "./abi";
+import { NFT_CONTRACT_ABI } from "../../contracts/abi/abi";
 
 // Client-side only wallet connection button
 const WalletButton = dynamic(() => import("@/components/common/WalletButton"), {
