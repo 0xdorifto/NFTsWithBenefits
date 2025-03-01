@@ -45,7 +45,32 @@ module.exports = {
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
+    customChains: [
+      {
+        network: "zircuit",
+        chainId: 48899,
+        urls: {
+          apiURL:
+            "https://explorer.testnet.zircuit.com/api/contractVerifyHardhat",
+          browserURL: "https://explorer.testnet.zircuit.com",
+        },
+      },
+      {
+        network: "flow",
+        chainId: 545,
+        urls: {
+          apiURL: "https://evm-testnet.flowscan.io/api",
+          browserURL: "https://evm-testnet.flowscan.io/",
+        },
+      },
+      {
+        network: "taraxa",
+        chainId: 842,
+        urls: {
+          apiURL: "https://testnet.to/api",
+          browserURL: "https://testnet.to/",
+        },
+      },
+    ],
   },
 };
-
-//zircuit, flow, hedera, base, taraxa, zksync, U2U

@@ -13,10 +13,16 @@ async function main() {
   }
 
   // Get provider
-  const provider = new Provider("https://testnet.era.zksync.dev");
+  const provider = new Provider(
+    "https://zksync-sepolia.g.alchemy.com/v2/0OhHdpFcyUwIiM3bFlPdhNWgmfq1w8vk"
+  );
+
+  console.log("provider", provider);
 
   // Initialize the wallet with provider
   const wallet = new Wallet(PRIVATE_KEY, provider);
+
+  console.log("wallet", wallet);
 
   console.log("Wallet address:", wallet.address);
 
