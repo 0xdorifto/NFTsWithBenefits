@@ -4,6 +4,7 @@ import ReviewForm from "@/components/agents/forms/ReviewForm";
 import SpecializationForm from "@/components/agents/forms/SpecializationForm";
 import TraitsForm from "@/components/agents/forms/TraitsForm";
 import ProgressStepper from "@/components/agents/ProgressStepper";
+import { chainDetails } from "@/constants/chains";
 import {
   initSatellite,
   setDoc,
@@ -18,7 +19,6 @@ import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useAccount, useChainId } from "wagmi";
 import { NFT_CONTRACT_ABI } from "./abi";
-import { chainDetails } from "@/constants/chains";
 
 // Client-side only wallet connection button
 const WalletButton = dynamic(() => import("@/components/common/WalletButton"), {
@@ -36,7 +36,7 @@ interface FormErrors {
 const CreateAgentPage = () => {
   const router = useRouter();
   const { address, isConnected, isConnecting } = useAccount();
-  const chainId = useChainId()
+  const chainId = useChainId();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [agentData, setAgentData] = useState({
@@ -51,7 +51,7 @@ const CreateAgentPage = () => {
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [junoUser, setJunoUser] = useState<User | null>(null);
 
-  const chainData = chainDetails[chainId]
+  const chainData = chainDetails[chainId];
 
   useEffect(() => {
     (async () => {
@@ -180,7 +180,7 @@ const CreateAgentPage = () => {
 
         // Mint NFT
         console.log("Minting NFT...");
-        const mintTx = await contract.mint();
+        const mintTx = await contract.mint(agentId + ".json");
         console.log("Waiting for mint transaction...");
         const receipt = await mintTx.wait();
         console.log("NFT minted successfully");

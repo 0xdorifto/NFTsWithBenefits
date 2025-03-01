@@ -5,7 +5,7 @@ export const chainDetails: Record<
   { explorer: string; nftContractAddress: string }
 > = {
   [chains.base.id]: {
-    nftContractAddress: "0xD9618DD71869d8E6899C06a551BD1081454cF1C9",
+    nftContractAddress: "0x27B20F4D9De56E21f632b9A61429B03d9D93aBc6",
     explorer: chains.base.blockExplorers.default.url,
   },
   // [chains.zircuit.id]: {
