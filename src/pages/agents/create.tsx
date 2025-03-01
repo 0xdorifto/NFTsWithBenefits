@@ -127,6 +127,43 @@ const CreateAgentPage = () => {
     return true;
   };
 
+  // Function to format agent data into NFT metadata attributes format
+  const formatAgentAttributes = (agentData) => {
+    const attributes = [];
+    
+    // Add traits as attributes
+    if (agentData.traits && agentData.traits.length > 0) {
+      agentData.traits.forEach(trait => {
+        attributes.push({
+          trait_type: "Trait",
+          value: trait
+        });
+      });
+    }
+    
+    // Add skills as attributes
+    if (agentData.skills && agentData.skills.length > 0) {
+      agentData.skills.forEach(skill => {
+        attributes.push({
+          trait_type: "Skill",
+          value: skill
+        });
+      });
+    }
+    
+    // Add specializations as attributes
+    if (agentData.specializations && agentData.specializations.length > 0) {
+      agentData.specializations.forEach(spec => {
+        attributes.push({
+          trait_type: "Specialization",
+          value: spec
+        });
+      });
+    }
+    
+    return attributes;
+  };
+
   const handleSubmit = async () => {
     if (!validateForm()) return;
     if (!address) return;
@@ -176,6 +213,9 @@ const CreateAgentPage = () => {
         }
       }
 
+      // Generate attributes array for NFT metadata
+      const attributes = formatAgentAttributes(agentData);
+
       const agentJson = {
         wallet_address: address,
         name: agentData.name,
@@ -186,6 +226,7 @@ const CreateAgentPage = () => {
         traits: agentData.traits || [],
         skills: agentData.skills || [],
         specializations: agentData.specializations || [],
+        attributes: attributes,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         version: "1.0.0",
