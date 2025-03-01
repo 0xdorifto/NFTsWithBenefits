@@ -2,7 +2,7 @@ import * as chains from "wagmi/chains"
 
 export const chainDetails: Record<number, {explorer: string; nftContractAddress:string}> = {
   [chains.base.id]: {
-    nftContractAddress: "0xFd605672F433fbA1Fb044b3AB10027dF67f518e7",
+    nftContractAddress: "0x7Ae0FC7Afc033517FdbE8Ef1d81C91031df0E4DA",
     explorer: chains.base.blockExplorers.default.url 
   }
 }
