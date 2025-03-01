@@ -2,11 +2,12 @@ import * as chains from "wagmi/chains";
 
 export const chainDetails: Record<
   number,
-  { explorer: string; nftContractAddress: string }
+  { explorer: string; nftContractAddress: string, gallery?: string }
 > = {
   [chains.base.id]: {
     nftContractAddress: "0xc5d0C25f49010D7C250AF970Ea241701be9d4E05",
     explorer: chains.base.blockExplorers.default.url,
+    gallery: "https://opensea.io/assets/base"
   },
   // [chains.zircuit.id]: {
   //   nftContractAddress: "",

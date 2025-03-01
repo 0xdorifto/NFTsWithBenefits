@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { initSatellite, listAssets } from '@junobuild/core-peer';
+import { initSatellite, listAssets, listDocs } from '@junobuild/core-peer';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
@@ -43,38 +43,39 @@ const AgentsPage = () => {
 
   async function fetchAgents() {
     try {
-      const response = await listAssets({
+      // Use docs instead of assets for the initial listing
+      // since our JSON metadata is now stored in documents
+      const docsResponse = await listDocs({
         collection: "agents",
         satellite: {
           satelliteId: process.env.NEXT_PUBLIC_SATELLITE_ID as string
         }
       });
 
-      if (response.items.length === 0) {
+      if (docsResponse.items.length === 0) {
         return [];
       }
 
-      const agentPromises = response.items.map(async (assetItem) => {
-        try {
-          const agentDataResponse = await fetch(assetItem.downloadUrl);
+      // Process each agent document
+      const agents = docsResponse.items
+        .filter((doc: any) => doc.data?.wallet_address) // Ensure we have valid agent data
+        .map(doc => {
+          // Extract the agent data from the document
+          const agentData = doc.data;
           
-          if (!agentDataResponse.ok) {
-            throw new Error(`Failed to fetch agent data: ${agentDataResponse.statusText}`);
-          }
-          
-          const agentData = await agentDataResponse.json();
-          return {...agentData, id: assetItem.name};
-        } catch (downloadError) {
-          console.error('Error downloading agent data:', downloadError);
-          return null;
-        }
-      });
-
-      const agentsData = await Promise.all(agentPromises);
-      
-      // Filter agents to only show ones matching the connected wallet address
-      return agentsData
-        .filter(agent => agent !== null && agent.wallet_address === address);
+          // Remove .json suffix from the ID if it exists
+          const agentId = doc.key.endsWith('.json') 
+            ? doc.key.slice(0, -5) 
+            : doc.key;
+            
+          return {
+            ...agentData,
+            id: agentId
+          };
+        })
+        .filter((agent: any) => agent.wallet_address === address); // Filter to current user's agents
+        
+      return agents;
     } catch (error) {
       console.error('Error fetching agents:', error);
       toast.error('Failed to load agents');
@@ -204,8 +205,13 @@ interface AgentCardProps {
 
 // AgentCard component stays the same
 const AgentCard = ({ agent }: AgentCardProps) => {
+  // Safely handle agent IDs with or without .json extension
+  const agentId = typeof agent.id === 'string' 
+    ? agent.id.replace(/\.json$/, "") 
+    : "";
+
   return (
-    <Link href={`/agents/${agent.id}`} className="block">
+    <Link href={`/agents/${agentId}`} className="block">
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl overflow-hidden hover:shadow-lg hover:shadow-purple-500/10 transition-all hover:translate-y-[-4px] border border-gray-700/50 h-full">
         <div className="aspect-square w-full overflow-hidden bg-gray-900 relative">
           {agent.avatar ? (
