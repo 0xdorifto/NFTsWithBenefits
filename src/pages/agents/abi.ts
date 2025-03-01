@@ -342,7 +342,13 @@ export const NFT_CONTRACT_ABI = [
     type: "function",
   },
   {
-    inputs: [],
+    inputs: [
+      {
+        internalType: "string",
+        name: "uri",
+        type: "string",
+      },
+    ],
     name: "mint",
     outputs: [],
     stateMutability: "nonpayable",
