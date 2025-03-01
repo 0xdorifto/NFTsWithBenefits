@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import Image from 'next/image';
 import { useAccount } from 'wagmi';
-import { shortenAddress } from '@/utils/formatting';
 import React from 'react';
-import { FaUserCircle, FaClock } from 'react-icons/fa';
+import { FaClock } from 'react-icons/fa';
 
 interface AgentHeroProps {
   agent: {

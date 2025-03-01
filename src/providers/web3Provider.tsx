@@ -12,7 +12,7 @@ const config = getDefaultConfig({
   chains,
 });
 
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
 
 export function Web3Provider({ children }: { children: any }) {
   return (

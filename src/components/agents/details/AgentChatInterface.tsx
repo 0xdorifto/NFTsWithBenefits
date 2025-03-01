@@ -3,6 +3,8 @@ import { FaPaperPlane, FaRobot, FaUser, FaSyncAlt } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { getAgentResponse, AgentContext } from '@/services/chatService';
+import { uploadFile, setDoc } from "@junobuild/core-peer";
+import { queryClient } from '@/providers/web3Provider';
 
 interface Message {
   id: string;
@@ -12,6 +14,7 @@ interface Message {
 }
 
 interface AgentChatInterfaceProps {
+  id: string;
   agent: {
     id: string;
     name: string;
@@ -20,23 +23,23 @@ interface AgentChatInterfaceProps {
     traits?: Record<string, number>;
     skills?: string[];
     specializations?: string[];
+    wallet_address?: string;
+    created_at?: string;
+    updated_at?: string;
+    version?: string;
+    avatar_metadata?: {
+      styleId: string;
+      variation: string;
+    };
   };
 }
 
-const AgentChatInterface: React.FC<AgentChatInterfaceProps> = ({ agent }) => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '0',
-      sender: 'agent',
-      text: `Hello! I'm ${agent.name}, your AI assistant. How can I help you today?`,
-      timestamp: new Date(),
-    },
-  ]);
+const AgentChatInterface: React.FC<AgentChatInterfaceProps> = ({ id, agent }) => {
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Automatically scroll to bottom whenever messages update
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -45,45 +48,145 @@ const AgentChatInterface: React.FC<AgentChatInterfaceProps> = ({ agent }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const updateAgent = async (agentUpdates: any) => {
+    try {
+      const updatedAgent = {
+        ...agent,
+        updated_at: new Date().toISOString(),
+      };
+
+      if (agentUpdates.description) {
+        updatedAgent.description = agentUpdates.description;
+      }
+
+      if (agentUpdates.skills) {
+        updatedAgent.skills = [
+          ...(updatedAgent.skills || []),
+          ...agentUpdates.skills.filter((skill: string) => 
+            !updatedAgent.skills?.some((s: string) => s.toLowerCase() === skill.toLowerCase())
+          )
+        ];
+      }
+
+      // Fixed traits handling - correctly handle traits as a Record<string, number>
+      if (agentUpdates.traits) {
+        // Initialize traits if it doesn't exist
+        if (!updatedAgent.traits) {
+          updatedAgent.traits = {};
+        }
+        
+        // Add each trait with a default value of 50 (middle of 0-100 range)
+        // or keep existing trait values if traits are provided as strings
+        agentUpdates.traits.forEach((trait: string) => {
+          const traitName = trait.toLowerCase().trim();
+          
+          // Check if this trait doesn't already exist in some form
+          const existingTrait = Object.keys(updatedAgent.traits || {}).find(
+            t => t.toLowerCase() === traitName
+          );
+          
+          if (!existingTrait) {
+            // Add as new trait with default value of 50
+            updatedAgent.traits[trait] = 50;
+          }
+        });
+      }
+
+      if (agentUpdates.specializations) {
+        updatedAgent.specializations = [
+          ...(updatedAgent.specializations || []),
+          ...agentUpdates.specializations.filter((spec: string) => 
+            !updatedAgent.specializations?.some((s: string) => s.toLowerCase() === spec.toLowerCase())
+          )
+        ];
+      }
+
+      const agentJsonBlob = new Blob([JSON.stringify(updatedAgent, null, 2)], {
+        type: "application/json",
+      });
+
+      const agentFile = new File(
+        [agentJsonBlob],
+        `${id}.json`,
+        { type: "application/json" }
+      );
+
+      const uploadResult = await uploadFile({
+        collection: "agents",
+        data: agentFile,
+        filename: `${id}.json`
+      });
+
+      // await setDoc({
+      //   collection: "agents",
+      //   doc: {
+      //     key: id,
+      //     data: {
+      //       ...updatedAgent,
+      //       fileUrl: uploadResult.downloadUrl
+      //     }
+      //   },
+      // });
+
+      toast.success('Agent updated successfully!');
+      queryClient.invalidateQueries({ queryKey: ["agent", id] })
+      return true;
+    } catch (error) {
+      console.error('Error updating agent:', error);
+      toast.error('Failed to update agent data');
+      return false;
+    }
+  };
+
   const handleSendMessage = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    
+
     if (!inputMessage.trim()) return;
-    
-    // Add user message to the chat
+
     const userMessage: Message = {
       id: Date.now().toString(),
       sender: 'user',
       text: inputMessage,
       timestamp: new Date(),
     };
-    
+
     setMessages((prev) => [...prev, userMessage]);
     setInputMessage('');
     setIsLoading(true);
-    
+
     try {
-      // Prepare the agent context to send to the API
       const agentContext: AgentContext = {
         id: agent.id,
         name: agent.name,
         description: agent.description || '',
+        // Convert traits object to array of strings for the prompt
         traits: Object.entries(agent.traits || {}).map(([key, value]) => `${key}: ${value}/100`),
         skills: agent.skills || [],
         specializations: agent.specializations || [],
       };
+
+      const response = await getAgentResponse(inputMessage, agentContext, id);
       
-      // Get response from our service (either direct OpenAI or API)
-      const responseText = await getAgentResponse(inputMessage, agentContext);
-      
-      // Add the agent's response to the chat
+      if (response.mutation) {
+        await updateAgent(response.mutation);
+        
+        // const updateMessage: Message = {
+        //   id: Date.now().toString() + '-update',
+        //   sender: 'agent',
+        //   text: `✨ I just learned something new: ${response.mutation.reason || 'Thank you for teaching me!'}`,
+        //   timestamp: new Date(),
+        // };
+        
+        // setMessages(prev => [...prev, updateMessage]);
+      }
+
       const agentResponse: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'agent',
-        text: responseText,
+        text: response.message,
         timestamp: new Date(),
       };
-      
+
       setMessages((prev) => [...prev, agentResponse]);
     } catch (error) {
       console.error('Error sending message:', error);
@@ -95,7 +198,6 @@ const AgentChatInterface: React.FC<AgentChatInterfaceProps> = ({ agent }) => {
 
   return (
     <div className="bg-gray-900 rounded-xl overflow-hidden shadow-lg border border-gray-800 flex flex-col h-[600px]">
-      {/* Chat header */}
       <div className="bg-gray-800 p-4 flex items-center">
         <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
           <img src={agent.avatar} alt={agent.name} className="h-full w-full object-cover" />
@@ -108,8 +210,7 @@ const AgentChatInterface: React.FC<AgentChatInterfaceProps> = ({ agent }) => {
           </div>
         </div>
       </div>
-      
-      {/* Chat messages */}
+
       <div className="flex-grow overflow-y-auto p-4 bg-gradient-to-b from-gray-900 to-gray-950">
         <div className="space-y-4">
           {messages.map((message) => (
@@ -121,11 +222,10 @@ const AgentChatInterface: React.FC<AgentChatInterfaceProps> = ({ agent }) => {
               className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[80%] rounded-lg p-3 ${
-                  message.sender === 'user'
+                className={`max-w-[80%] rounded-lg p-3 ${message.sender === 'user'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-700 text-gray-100'
-                }`}
+                  }`}
               >
                 <div className="flex items-center space-x-2 mb-1">
                   {message.sender === 'agent' ? (
@@ -147,7 +247,7 @@ const AgentChatInterface: React.FC<AgentChatInterfaceProps> = ({ agent }) => {
               </div>
             </motion.div>
           ))}
-          
+
           {isLoading && (
             <div className="flex justify-start">
               <div className="bg-gray-700 rounded-lg p-3 flex items-center space-x-2">
@@ -156,12 +256,11 @@ const AgentChatInterface: React.FC<AgentChatInterfaceProps> = ({ agent }) => {
               </div>
             </div>
           )}
-          
+
           <div ref={messagesEndRef} />
         </div>
       </div>
-      
-      {/* Input form */}
+
       <form onSubmit={handleSendMessage} className="bg-gray-800 p-4 flex space-x-2">
         <input
           type="text"

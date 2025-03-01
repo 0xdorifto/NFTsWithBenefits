@@ -1,90 +1,116 @@
+import { Agent } from '@/pages/agents/[id]';
 import React from 'react';
-import { FaBrain, FaLightbulb, FaChartLine } from 'react-icons/fa';
-import clsx from 'clsx';
+import { FaGraduationCap, FaBrain, FaStar } from 'react-icons/fa';
+
 
 interface AgentSkillsSectionProps {
-  agent: {
-    traits: Record<string, number>;
-    skills: string[];
-    specializations: string[];
-  };
+  agent: Agent;
 }
 
 const AgentSkillsSection: React.FC<AgentSkillsSectionProps> = ({ agent }) => {
-  const { traits, skills, specializations } = agent;
-
-  // Convert traits to an array for easier rendering
-  const traitsList = Object.entries(traits).map(([name, value]) => ({
-    name,
-    value,
-    // Determine color based on trait value
-    color: value >= 90 ? 'bg-purple-500' : 
-           value >= 80 ? 'bg-blue-500' : 
-           value >= 70 ? 'bg-green-500' : 
-           value >= 60 ? 'bg-yellow-500' : 'bg-red-500'
-  }));
+  // Calculate knowledge level based on skills and specializations
+  const knowledgeLevel = Math.min(10, Math.ceil((agent.skills.length + (agent.specializations?.length || 0) * 2) / 3));
+  
+  // Knowledge level descriptors
+  const levelDescriptors = [
+    "Just Born", "Learning Basics", "Curious Beginner", "Knowledge Seeker", 
+    "Growing Mind", "Skilled Learner", "Knowledge Explorer", "Wisdom Gatherer", 
+    "Expertise Developer", "Knowledgeable Being", "Evolved Intelligence"
+  ];
 
   return (
-    <div className="bg-gray-900 rounded-xl p-6 shadow-lg border border-gray-800">
-      <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-        <FaBrain className="mr-2 text-blue-400" /> Agent Capabilities
+    <div className="bg-gray-900 rounded-lg p-6 border border-gray-800 shadow-lg">
+      <h2 className="text-xl text-white font-bold mb-6 flex items-center">
+        <FaBrain className="mr-2 text-blue-500" />
+        Agent Knowledge
       </h2>
 
-      {/* Traits Section */}
-      <div className="mb-8">
-        <h3 className="text-lg font-semibold text-blue-400 mb-4 flex items-center">
-          <FaChartLine className="mr-2" /> Core Traits
-        </h3>
-        <div className="space-y-4">
-          {traitsList.map((trait) => (
-            <div key={trait.name} className="space-y-1">
-              <div className="flex justify-between text-gray-300">
-                <span className="capitalize">{trait.name}</span>
-                <span className="font-semibold">{trait.value}/100</span>
-              </div>
-              <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                <div 
-                  className={clsx("h-full rounded-full", trait.color)} 
-                  style={{ width: `${trait.value}%` }}
-                />
-              </div>
-            </div>
-          ))}
+      {/* Knowledge Level */}
+      <div className="mb-6">
+        <div className="flex justify-between text-sm text-gray-400 mb-1">
+          <span>Evolution Level</span>
+          <span>{knowledgeLevel}/10</span>
         </div>
+        <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-gradient-to-r from-blue-500 to-purple-600" 
+            style={{ width: `${(knowledgeLevel / 10) * 100}%` }}
+          />
+        </div>
+        <p className="text-gray-400 text-sm mt-1">{levelDescriptors[knowledgeLevel]}</p>
       </div>
 
-      {/* Skills Section */}
-      <div className="mb-8">
-        <h3 className="text-lg font-semibold text-blue-400 mb-4 flex items-center">
-          <FaLightbulb className="mr-2" /> Skills
+      {/* Skills */}
+      <div className="mb-6">
+        <h3 className="text-white text-md font-semibold mb-3 flex items-center">
+          <FaGraduationCap className="mr-2 text-green-400" />
+          Skills
         </h3>
         <div className="flex flex-wrap gap-2">
-          {skills.map((skill) => (
-            <span 
-              key={skill} 
-              className="px-3 py-1 bg-blue-900/50 border border-blue-700 rounded-full text-blue-300 text-sm"
-            >
-              {skill}
-            </span>
-          ))}
+          {agent.skills.length > 0 ? (
+            agent.skills.map((skill, index) => (
+              <span 
+                key={index}
+                className="bg-gray-800 text-gray-300 px-3 py-1 rounded-full text-xs"
+              >
+                {skill}
+              </span>
+            ))
+          ) : (
+            <p className="text-gray-500 text-sm italic">No skills learned yet. Teach your agent new skills!</p>
+          )}
         </div>
       </div>
 
-      {/* Specializations Section */}
+      {/* Specializations */}
+      <div className="mb-6">
+        <h3 className="text-white text-md font-semibold mb-3 flex items-center">
+          <FaStar className="mr-2 text-yellow-400" />
+          Specializations
+        </h3>
+        <div className="flex flex-wrap gap-2">
+          {agent.specializations && agent.specializations.length > 0 ? (
+            agent.specializations.map((spec, index) => (
+              <span 
+                key={index}
+                className="bg-gray-800/60 border border-yellow-700/30 text-yellow-300 px-3 py-1 rounded-full text-xs"
+              >
+                {spec}
+              </span>
+            ))
+          ) : (
+            <p className="text-gray-500 text-sm italic">No specializations yet. Help your agent master specific domains!</p>
+          )}
+        </div>
+      </div>
+
+      {/* Traits */}
       <div>
-        <h3 className="text-lg font-semibold text-blue-400 mb-4 flex items-center">
-          <FaLightbulb className="mr-2" /> Specializations
+        <h3 className="text-white text-md font-semibold mb-3 flex items-center">
+          <span className="mr-2">🧠</span>
+          Personality Traits
         </h3>
         <div className="flex flex-wrap gap-2">
-          {specializations.map((spec) => (
-            <span 
-              key={spec} 
-              className="px-3 py-1 bg-purple-900/50 border border-purple-700 rounded-full text-purple-300 text-sm"
-            >
-              {spec}
-            </span>
-          ))}
+          {Array.isArray(agent.traits) && agent.traits.length > 0 ? (
+            agent.traits.map((trait, index) => (
+              <span 
+                key={index}
+                className="bg-gray-800 text-blue-300 px-3 py-1 rounded-full text-xs"
+              >
+                {typeof trait === 'string' ? trait : trait.name}
+              </span>
+            ))
+          ) : (
+            <p className="text-gray-500 text-sm italic">Personality still forming through interaction</p>
+          )}
         </div>
+      </div>
+      
+      {/* Learning tip */}
+      <div className="mt-6 bg-blue-900/20 border border-blue-800 rounded-lg p-4">
+        <p className="text-blue-300 text-sm">
+          <strong>Tip:</strong> Chat with your agent and teach it new things to help it evolve. The more you interact, the more your agent will learn and grow!
+        </p>
       </div>
     </div>
   );
