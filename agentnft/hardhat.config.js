@@ -21,7 +21,7 @@ module.exports = {
       accounts: [process.env.PRIVATE_KEY],
     },
     base: {
-      url: "https://base-sepolia.g.alchemy.com/v2/0OhHdpFcyUwIiM3bFlPdhNWgmfq1w8vk",
+      url: "https://base-mainnet.g.alchemy.com/v2/0OhHdpFcyUwIiM3bFlPdhNWgmfq1w8vk",
       accounts: [process.env.PRIVATE_KEY],
     },
     taraxa: {

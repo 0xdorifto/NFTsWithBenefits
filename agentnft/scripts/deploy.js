@@ -1,8 +1,10 @@
 const hre = require("hardhat");
 
 async function main() {
+  const baseURI = "https://4icer-eiaaa-aaaal-ar7lq-cai.icp0.io/agents";
+
   const MyNFT = await hre.ethers.getContractFactory("MyNFT");
-  const myNFT = await MyNFT.deploy();
+  const myNFT = await MyNFT.deploy(baseURI);
 
   await myNFT.waitForDeployment();
 
