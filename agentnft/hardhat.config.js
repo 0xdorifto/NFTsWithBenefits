@@ -4,10 +4,6 @@ require("dotenv").config();
 module.exports = {
   solidity: "0.8.20",
   networks: {
-    sepolia: {
-      url: "https://eth-sepolia.g.alchemy.com/v2/0OhHdpFcyUwIiM3bFlPdhNWgmfq1w8vk",
-      accounts: [process.env.PRIVATE_KEY],
-    },
     zircuit: {
       url: "https://zircuit1-testnet.p2pify.com",
       accounts: [process.env.PRIVATE_KEY],

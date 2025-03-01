@@ -15,10 +15,9 @@ contract MyNFT is ERC721URIStorage, Ownable {
         _baseTokenURI = baseURI;
     }
 
-    function mint(string memory tokenURI) external onlyOwner {
+    function mint() external onlyOwner {
         _nextTokenId++;
         _safeMint(msg.sender, _nextTokenId);
-        _setTokenURI(_nextTokenId, tokenURI);
     }
 
     function _baseURI() internal view override returns (string memory) {

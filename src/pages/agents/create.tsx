@@ -32,7 +32,7 @@ interface FormErrors {
   specializations?: string;
 }
 
-const NFT_CONTRACT_ADDRESS = "0xDa9c2Cb1cAE56288Be700a55F451fCcB1aEec57c";
+const NFT_CONTRACT_ADDRESS = "0x7Ae0FC7Afc033517FdbE8Ef1d81C91031df0E4DA";
 
 const CreateAgentPage = () => {
   const router = useRouter();
@@ -178,9 +178,7 @@ const CreateAgentPage = () => {
 
         // Mint NFT
         console.log("Minting NFT...");
-        const mintTx = await contract.mint(address, {
-          gasLimit: 200000, // Adding explicit gas limit for minting
-        });
+        const mintTx = await contract.mint();
         console.log("Waiting for mint transaction...");
         const receipt = await mintTx.wait();
         console.log("NFT minted successfully");
