@@ -9,13 +9,10 @@ const Navigation = () => {
   const router = useRouter();
   const { isConnected } = useAccount();
   
-  const isActive = (path: string) => router.pathname === path;
-
   return (
     <nav className="fixed top-0 w-full z-50 bg-gray-900/80 backdrop-blur-sm border-b border-white/10">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <Logo />
           </Link>

@@ -193,19 +193,6 @@ const AgentChatInterface: React.FC<AgentChatInterfaceProps> = ({ id, agent }) =>
 
   return (
     <div className="bg-gray-900 rounded-xl overflow-hidden shadow-lg border border-gray-800 flex flex-col h-[600px]">
-      <div className="bg-gray-800 p-4 flex items-center">
-        <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-          <img src={agent.avatar} alt={agent.name} className="h-full w-full object-cover" />
-        </div>
-        <div>
-          <h2 className="text-white font-bold">{agent.name}</h2>
-          <div className="flex items-center">
-            <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
-            <span className="text-green-400 text-xs">Online</span>
-          </div>
-        </div>
-      </div>
-
       <div className="flex-grow overflow-y-auto p-4 bg-gradient-to-b from-gray-900 to-gray-950">
         <div className="space-y-4">
           {messages.map((message) => (

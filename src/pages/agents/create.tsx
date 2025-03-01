@@ -16,8 +16,9 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import { useAccount } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 import { NFT_CONTRACT_ABI } from "./abi";
+import { chainDetails } from "@/constants/chains";
 
 // Client-side only wallet connection button
 const WalletButton = dynamic(() => import("@/components/common/WalletButton"), {
@@ -32,11 +33,10 @@ interface FormErrors {
   specializations?: string;
 }
 
-const NFT_CONTRACT_ADDRESS = "0x7Ae0FC7Afc033517FdbE8Ef1d81C91031df0E4DA";
-
 const CreateAgentPage = () => {
   const router = useRouter();
   const { address, isConnected, isConnecting } = useAccount();
+  const chainId = useChainId()
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [agentData, setAgentData] = useState({
@@ -50,6 +50,8 @@ const CreateAgentPage = () => {
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [junoUser, setJunoUser] = useState<User | null>(null);
+
+  const chainData = chainDetails[chainId]
 
   useEffect(() => {
     (async () => {
@@ -171,7 +173,7 @@ const CreateAgentPage = () => {
 
         // Create contract instance
         const contract = new ethers.Contract(
-          NFT_CONTRACT_ADDRESS,
+          chainData.nftContractAddress,
           NFT_CONTRACT_ABI,
           signer
         );
@@ -202,7 +204,6 @@ const CreateAgentPage = () => {
 
         const network = await provider.getNetwork();
 
-        // Save agent data with NFT contract info
         await setDoc({
           collection: "agents",
           doc: {
@@ -210,7 +211,7 @@ const CreateAgentPage = () => {
             data: {
               ...agentJson,
               fileUrl: uploadResult.downloadUrl,
-              nftContractAddress: NFT_CONTRACT_ADDRESS,
+              nftContractAddress: chainData.nftContractAddress,
               nftTokenId: tokenId,
               chainId: network.chainId,
             },
