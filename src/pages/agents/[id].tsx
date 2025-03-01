@@ -7,8 +7,10 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import AgentSkillsSection from '@/components/agents/details/AgentSkillsSection';
 import { toast } from 'react-hot-toast';
 import AgentChatInterface from '@/components/agents/details/AgentChatInterface';
-import { initSatellite, listAssets } from '@junobuild/core-peer';
+import { initSatellite, listAssets, listDocs } from '@junobuild/core-peer';
 import { useQuery } from '@tanstack/react-query';
+import { chainDetails } from '@/constants/chains';
+import { useChainId } from 'wagmi';
 
 export interface Agent {
   id: string;
@@ -32,6 +34,10 @@ export interface Agent {
 const AgentDetailsPage = () => {
   const router = useRouter();
   const { id } = router.query;
+  const chainId = useChainId()
+
+  const chainData = chainDetails[chainId]
+
 
   useEffect(() => {
     (async () => {
@@ -57,6 +63,18 @@ const AgentDetailsPage = () => {
     if (!id) return;
 
     try {
+      const docsResponse = await listDocs({
+        collection: "agents",
+        satellite: {
+          satelliteId: process.env.NEXT_PUBLIC_SATELLITE_ID as string
+        },
+        filter: {
+          matcher: {
+            key: id as string
+          }
+        }
+      });
+
       const response = await listAssets({
         collection: "agents",
         satellite: {
@@ -75,6 +93,7 @@ const AgentDetailsPage = () => {
       }
 
       const assetItem = response.items[0];
+      const docItem: any = docsResponse.items[0];
 
       try {
         const agentDataResponse = await fetch(assetItem.downloadUrl);
@@ -84,7 +103,7 @@ const AgentDetailsPage = () => {
 
         const agentData = await agentDataResponse.json();
 
-        return agentData
+        return { ...agentData, nftTokenId: docItem.data.nftTokenId };
       } catch (downloadError) {
         console.error('Error downloading agent data:', downloadError);
         toast.error('Failed to load agent details');
@@ -121,7 +140,7 @@ const AgentDetailsPage = () => {
       </Head>
 
       <main className="container mx-auto px-4 py-8">
-        <AgentHero agent={agent} />
+        <AgentHero agent={agent} nftUrl={`${chainData.explorer}/nft/${chainData.nftContractAddress}/${agent.nftTokenId}`} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           <div className="lg:col-span-2">

@@ -134,11 +134,53 @@ const CreateAgentPage = () => {
     setIsSubmitting(true);
 
     try {
-      // Create agent JSON data
+      // Generate a unique ID for this agent
+      const timestamp = Date.now();
+      const agentId = `agent-${address}-${timestamp}`;
+      let avatarUrl = "";
+
+      if (agentData.avatar && agentData.avatar.startsWith('data:')) {
+        try {
+          const [metadataPart, dataPart] = agentData.avatar.split(',');
+          const contentType = metadataPart.match(/:(.*?);/)?.[1] || 'image/svg+xml';
+          
+          let binaryData;
+          if (metadataPart.includes('base64')) {
+            binaryData = atob(dataPart);
+            const bytes = new Uint8Array(binaryData.length);
+            for (let i = 0; i < binaryData.length; i++) {
+              bytes[i] = binaryData.charCodeAt(i);
+            }
+            binaryData = bytes.buffer;
+          } else {
+            binaryData = decodeURIComponent(dataPart);
+          }
+          
+          const blob = new Blob([binaryData], { type: contentType });
+          
+          const avatarFilename = agentId + "-avatar";
+          const avatarFile = new File([blob], avatarFilename, { type: contentType });
+          
+          console.log("Uploading avatar image...");
+          const avatarUploadResult = await uploadFile({
+            collection: "agents",
+            data: avatarFile,
+            filename: avatarFilename,
+          });
+          
+          avatarUrl = avatarUploadResult.downloadUrl;
+          console.log("Avatar uploaded successfully:", avatarUrl);
+        } catch (avatarError) {
+          console.error("Error uploading avatar:", avatarError);
+          toast.error("Failed to upload agent avatar, but continuing with creation");
+        }
+      }
+
       const agentJson = {
         wallet_address: address,
         name: agentData.name,
-        avatar: agentData.avatar,
+        image: avatarUrl || agentData.avatar,
+        avatar: avatarUrl || agentData.avatar,
         avatar_metadata: agentData.avatarMetadata,
         description: agentData.description,
         traits: agentData.traits || [],
@@ -153,17 +195,15 @@ const CreateAgentPage = () => {
         type: "application/json",
       });
 
-      const agentId = `agent-${address}-${Date.now()}`;
-
       const agentFile = new File([agentJsonBlob], agentId, {
         type: "application/json",
       });
 
-      // Upload metadata first
+      // Upload the agent metadata JSON
       const uploadResult = await uploadFile({
         collection: "agents",
         data: agentFile,
-        filename: agentFile.name,
+        filename: agentFile.name + ".json",
       });
 
       try {
@@ -211,6 +251,7 @@ const CreateAgentPage = () => {
             data: {
               ...agentJson,
               fileUrl: uploadResult.downloadUrl,
+              avatarUrl: avatarUrl, // Add the avatar URL explicitly
               nftContractAddress: chainData.nftContractAddress,
               nftTokenId: tokenId,
               chainId: network.chainId,
